@@ -5,6 +5,14 @@ VisualStudioVersion = 16.0.809.2
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FindMyPath", "FindMyPath\FindMyPath.csproj", "{42F0715A-6EDB-401B-A967-80D6965CA568}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{3805443B-50EF-4F9E-BC0E-771F707F7164}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{7851D13E-3610-4E57-9BB2-65DDFA1F44B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "tests\UnitTests\UnitTests.csproj", "{C4B69E4E-C7E0-421D-8901-76AF1A0CD5CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "consoleApp", "samples\consoleApp\consoleApp.csproj", "{5C6E7D6D-F201-4827-B299-BB01D5D98162}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,11 +23,23 @@ Global
 		{42F0715A-6EDB-401B-A967-80D6965CA568}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42F0715A-6EDB-401B-A967-80D6965CA568}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42F0715A-6EDB-401B-A967-80D6965CA568}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4B69E4E-C7E0-421D-8901-76AF1A0CD5CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4B69E4E-C7E0-421D-8901-76AF1A0CD5CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4B69E4E-C7E0-421D-8901-76AF1A0CD5CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4B69E4E-C7E0-421D-8901-76AF1A0CD5CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C6E7D6D-F201-4827-B299-BB01D5D98162}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C6E7D6D-F201-4827-B299-BB01D5D98162}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C6E7D6D-F201-4827-B299-BB01D5D98162}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C6E7D6D-F201-4827-B299-BB01D5D98162}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4106B9D2-443C-4B66-98B4-8CE779C236E5}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C4B69E4E-C7E0-421D-8901-76AF1A0CD5CA} = {3805443B-50EF-4F9E-BC0E-771F707F7164}
+		{5C6E7D6D-F201-4827-B299-BB01D5D98162} = {7851D13E-3610-4E57-9BB2-65DDFA1F44B2}
 	EndGlobalSection
 EndGlobal
