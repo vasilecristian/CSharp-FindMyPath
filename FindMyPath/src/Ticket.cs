@@ -49,17 +49,17 @@ namespace fmp
 		/// <summary>
 		/// Getter for the detected path.
 		/// </summary>
-		public List<uint> FoundedPath { get; internal set; }
+		public List<ulong> FoundedPath { get; internal set; }
 
 		/// <summary>
 		/// Getter for the goal node.
 		/// </summary>
-		public uint GoalIndex { get; internal set; }
+		public ulong GoalIndex { get; internal set; }
 
 		/// <summary>
 		/// Getter for the start node.
 		/// </summary>
-		public uint StartIndex { get; internal set; }
+		public ulong StartIndex { get; internal set; }
 
 
 		/// <summary>
@@ -79,8 +79,10 @@ namespace fmp
 		internal Node Current { get; set; } = null;
 
 
-		public Ticket(uint startIndex, uint goalIndex)
+		public Ticket(ulong startIndex, ulong goalIndex)
         {
+			Console.WriteLine(this.GetType().FullName);
+
 			StartIndex = startIndex;
 			GoalIndex = goalIndex;
         }
