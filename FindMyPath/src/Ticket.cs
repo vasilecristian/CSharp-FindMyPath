@@ -33,6 +33,11 @@ namespace fmp
 			/// The ticket was processed but the process was stopped for some reason...
 			/// </summary>
 			STOPPED,
+
+			/// <summary>
+			/// The ticket was in processing state but the was cancelled from external...
+			/// </summary>
+			CANCELLED,
 		};
 
 		/// <summary>
@@ -44,12 +49,12 @@ namespace fmp
 		/// <summary>
 		/// Getter for the steps required to determine the path.
 		/// </summary>
-		public uint Steps { get; set; } = 0;
+		public uint Steps { get; internal set; } = 0;
 
 		/// <summary>
 		/// Getter for the detected path.
 		/// </summary>
-		public List<ulong> FoundedPath { get; internal set; }
+		public List<ulong> Path { get; internal set; } = new List<ulong>();
 
 		/// <summary>
 		/// Getter for the goal node.
@@ -65,20 +70,24 @@ namespace fmp
 		/// <summary>
 		/// Getter for the opened list.
 		/// </summary>
-		internal List<Node> OpenedList { get; set; } = null;
+		internal SortedDictionary<ulong, Node> OpenList { get; set; } = new SortedDictionary<ulong, Node>();
 
 		/// <summary>
 		/// Getter for the closed list.
 		/// </summary>
-		internal List<Node> ClosedList { get; set; } = null;
+		internal SortedDictionary<ulong, Node> ClosedList { get; set; } = new SortedDictionary<ulong, Node>();
 
 
 		/// <summary>
         /// It is the current procesed Node.
         /// </summary>
-		internal Node Current { get; set; } = null;
+		internal Node CurrentNode { get; set; } = null;
 
-
+		/// <summary>
+        /// The constructor
+        /// </summary>
+        /// <param name="startIndex">Index of the start Node.</param>
+        /// <param name="goalIndex">Index of the goal(aka target) Node.</param>
 		public Ticket(ulong startIndex, ulong goalIndex)
         {
 			Console.WriteLine(this.GetType().FullName);

@@ -9,39 +9,39 @@ namespace fmp
     /// <summary>
     /// This is the Main class that implemnts the generic A * (A star) search algorithm.
     /// </summary>
-    public class FindMyPath
-        : IDisposable
+    public class FindMyPath: IDisposable
     {
-        /// <summary>
-        /// Running status property.
-        /// </summary>
-        public bool IsRunning { get; private set; } = false;
-
         /// <summary>
         /// The constructor.
         /// </summary>
-        /// <param name="navMesh"> Is a pointer to the user's navmesh class.</param>
+        /// <param name="navMesh">Is a pointer to the user's navmesh class.</param>
         public FindMyPath(INavMesh navMesh)
         {
             NavMesh = navMesh;
+        }
 
-            // init cancellation token
-            cancellationToken = new CancellationTokenSource();
-
-            workerTask = Task.Run(async () =>
+		/// <summary>
+        /// This will create an async task that will start the A* algorithm to find the path.
+        /// </summary>
+        /// <param name="ticket">is the ticket request.</param>
+        /// <param name="cancelTokenSrc">is the cancelation token</param>
+        /// <returns>a Task that will be competed when the path will be detected.</returns>
+		public async Task<Ticket> FindPath(Ticket ticket, CancellationTokenSource cancelTokenSrc)
+        {
+			await Task.Run(() =>
             {
-                try
-                {
-                    await WorkerRoutineAsync(cancellationToken.Token);
-                }
-                finally
-                {
+                Console.WriteLine("Task.Run");
 
-                    IsRunning = false;
-                }
-            });
+				while (!ProcessTicket(ticket, cancelTokenSrc.Token))
+				{
+					
+				}
 
-            IsRunning = true;
+				Console.WriteLine("Task.Run 2");
+
+            }, cancelTokenSrc.Token);
+
+			return ticket;
         }
 
         /// <summary>
@@ -51,58 +51,181 @@ namespace fmp
         public void Dispose()
         {
             Console.WriteLine(this.GetType().FullName + ".Dispose");
-
-            try
-            {
-                cancellationToken.Cancel();
-                workerTask.ConfigureAwait(false).GetAwaiter().GetResult();
-            }
-            catch (TaskCanceledException)
-            {
-                Console.WriteLine("Scheduler worker task was canceled");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Unexpected error " + e);
-            }
-
-            // cleanup cancellation token source
-            cancellationToken.Dispose();
-            cancellationToken = null;
-
-            IsRunning = false;
         }
 
-        /// <summary>
-        /// Add a new request to determine a path.
+		
+
+		/// <summary>
+        /// This is the A* function. This will be called multiple times until
+        /// the path is calculated. All the states values are storred in Ticket.
+        /// To calcualte the path this function must be called multiple times until
+        /// will return true!
         /// </summary>
-        /// <param name="ticket"></param>
-        public void AddTicket(Ticket ticket)
-        {
-            Console.WriteLine(this.GetType().FullName + ".AddTicket");
+        /// <param name="ticket">the request</param>
+        /// <param name="token">the cancelation token</param>
+        /// <returns>true if the processing finished.</returns>
+		private bool ProcessTicket(Ticket ticket, CancellationToken token)
+		{
+			/// Check the cancelation token.
+			if (token.IsCancellationRequested)
+			{
+				/// In case the Cancel was requested from external,
+				/// the function will return.
+				ticket.State = Ticket.STATE.CANCELLED;
+				return true;
+			}
 
-            Tickets.Add(ticket);
-        }
+			/// Switch the state to Processing.
+			ticket.State = Ticket.STATE.PROCESSING;
 
-        private async Task WorkerRoutineAsync(CancellationToken token)
-        {
-            while (!token.IsCancellationRequested)
-            {
-                Console.WriteLine(this.GetType().FullName + ".WorkerRoutineAsync");
-
-                // enter wait state
-                await Task.Delay(2, token).ConfigureAwait(false);
-            }
-        }
+			ticket.Steps++;
 
 
-        private INavMesh NavMesh { get; set; } = null;
+			/// Chekc if the StartIndex is the same with GoalIndex
+			if (ticket.StartIndex == ticket.GoalIndex)
+			{
+				ticket.Path.Add(ticket.StartIndex);
 
-        private Task workerTask;
-        private CancellationTokenSource cancellationToken;
+				/// Search is stopped because the goal si the same with start node
+				ticket.State = Ticket.STATE.COMPLETED;
+				return true;
+			}
 
-        private List<Ticket> Tickets { get; set; } = new List<Ticket>();
+			
+			/// This is the first step -> closed list is empty.
+			/// Add the start node to the closed list.
+			if (ticket.ClosedList.Count == 0)
+			{
+				Node startNode = new Node(ticket.StartIndex);
 
+				/// calculate the distance to target
+				startNode.DistanceToTarget = NavMesh.ComputeDistanceToGoal(ticket.GoalIndex, ticket.StartIndex);
+
+				/// Calculate the "F" value
+				startNode.F = startNode.DistanceToTarget;
+
+				/// Add the start node to the open list
+				ticket.OpenList[ticket.StartIndex] = startNode;
+
+				/// Set the current node to be the start node
+				ticket.CurrentNode = startNode;
+			}
+
+			//Console.WriteLine(this.GetType().FullName + ".ProcessTicket ticket.CurrentNode.Index=" + ticket.CurrentNode.Index);
+
+			/// If the start node does not have valid neighbors, try to GetNeighbors and add them to the open list
+			if (ticket.CurrentNode.Neighbors.Count == 0)
+			{
+				ticket.CurrentNode.Neighbors = NavMesh.GetNeighbors(ticket.CurrentNode.Index);// ticket->m_current->GetNeighbors();
+			}
+
+			foreach(ulong neighborIndex in ticket.CurrentNode.Neighbors)
+			{
+				/// Check if the goal is one of the neighbors
+				if (ticket.GoalIndex == neighborIndex)
+				{
+					ticket.Path.Add(ticket.GoalIndex);
+
+					Node node = ticket.CurrentNode;
+					do
+					{
+						ticket.Path.Add(node.Index);
+						//std::cout << "result " << node << " " << node->m_index << " " << node->m_f << std::endl;
+						node = node.Parent;
+					}
+					while (node != null);
+
+					ticket.State = Ticket.STATE.COMPLETED;
+					return true;
+				}
+
+				bool addedAlready = false;
+				Node neighborNode = null;
+
+
+				/// check if is in open list
+				if (ticket.OpenList.ContainsKey(neighborIndex))
+				{
+					addedAlready = true;
+					neighborNode = ticket.OpenList[neighborIndex];
+				}
+				else if (ticket.ClosedList.ContainsKey(neighborIndex))
+				{
+					addedAlready = true;
+					neighborNode = ticket.ClosedList[neighborIndex];
+				}
+
+				if (!addedAlready)
+				{
+					neighborNode = new Node(neighborIndex);
+					neighborNode.Parent = ticket.CurrentNode;
+				}
+
+
+
+				/// calculate the distance to target
+				neighborNode.DistanceToTarget = NavMesh.ComputeDistanceToGoal(ticket.GoalIndex, neighborIndex);
+
+				/// calculate the cost to travel from startIndex node to the neighbor note
+				neighborNode.Cost = NavMesh.ComputeCostToNeighbor(neighborIndex, ticket.CurrentNode.Index);
+
+				/// Calculate the "F" value
+				double _f = neighborNode.DistanceToTarget + neighborNode.Cost;
+
+				if (!addedAlready)
+				{
+					neighborNode.F = _f;
+
+					/// Add the neighbor node to the open list
+					ticket.OpenList[neighborIndex] = neighborNode;
+				}
+				else if (neighborNode.F > _f)
+				{
+					neighborNode.F = _f;
+				}
+			}
+
+
+			/// Chekc if there are some nodes in Open list
+			if (ticket.OpenList.Count == 0)
+			{
+				Node node = ticket.CurrentNode;
+				do
+				{
+					ticket.Path.Add(node.Index);
+					
+					node = node.Parent;
+				}
+				while (node != null);
+
+				/// If no nodes -> search is stopped due to no path to goal.
+				ticket.State = Ticket.STATE.STOPPED;
+				return true;
+			}
+			
+
+
+
+			/// Get the object with the minimal "F"
+			double f = Double.MaxValue;
+			foreach (ulong index in ticket.OpenList.Keys)
+			{
+				if (ticket.OpenList[index].F < f)
+				{
+					f = ticket.OpenList[index].F;
+					ticket.CurrentNode = ticket.OpenList[index];
+				}
+			}
+
+
+			ticket.OpenList.Remove(ticket.CurrentNode.Index);
+			
+			ticket.ClosedList[ticket.CurrentNode.Index] = ticket.CurrentNode;
+
+			return false;
+		}
+
+		private INavMesh NavMesh { get; set; } = null;
   
     }
 }

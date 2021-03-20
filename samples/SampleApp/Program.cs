@@ -17,14 +17,78 @@ namespace SampleApp
 
             Ticket ticket = new Ticket(navMesh.GetIndex(1, 1), navMesh.GetIndex(6, 6));
 
-            pathEngine.AddTicket(ticket);
+            //Ticket ticket = new Ticket(navMesh.GetIndex(0, 0), navMesh.GetIndex(7, 3));
+
+
+            CancellationTokenSource cancelToken = new CancellationTokenSource();
+            Task<Ticket> task = pathEngine.FindPath(ticket, cancelToken);
+            task.ContinueWith(previousTask =>
+            {
+                Console.WriteLine("Result Steps=" + previousTask.Result.Steps);
+                Console.WriteLine("Result State=" + previousTask.Result.State);
+                navMesh.PrintMap(previousTask.Result.Path);
+            });
+
+            Ticket ticket2 = new Ticket(navMesh.GetIndex(1, 1), navMesh.GetIndex(6, 6));
+            CancellationTokenSource cancelToken2 = new CancellationTokenSource();
+            Task<Ticket> task2 = pathEngine.FindPath(ticket2, cancelToken2);
+            task2.ContinueWith(previousTask =>
+            {
+                Console.WriteLine("Result2 Steps=" + previousTask.Result.Steps);
+                Console.WriteLine("Result2 State=" + previousTask.Result.State);
+                navMesh.PrintMap(previousTask.Result.Path);
+            });
+
+            Ticket ticket3 = new Ticket(navMesh.GetIndex(1, 1), navMesh.GetIndex(6, 6));
+            CancellationTokenSource cancelToken3 = new CancellationTokenSource();
+            Task<Ticket> task3 = pathEngine.FindPath(ticket3, cancelToken3);
+            task3.ContinueWith(previousTask =>
+            {
+                Console.WriteLine("Result3 Steps=" + previousTask.Result.Steps);
+                Console.WriteLine("Result3 State=" + previousTask.Result.State);
+                navMesh.PrintMap(previousTask.Result.Path);
+            });
+
+
+            int i = 0;
+            while (!TaskIsCompleted(task))
+            {
+                Console.WriteLine("Waiting... ");
+                Thread.Sleep(2);
+                i++;
+                if(i==5)
+                {
+                    //cancelToken.Cancel();
+                }
+            }
+
+            Thread.Sleep(1000);
 
             pathEngine.Dispose();
+        }
 
-            while (pathEngine.IsRunning)
+
+        public static bool TaskIsCompleted(Task task)
+        {
+            if ((task != null) && (task.IsCompleted == false ||
+                                   task.Status == TaskStatus.Running ||
+                                   task.Status == TaskStatus.WaitingToRun ||
+                                   task.Status == TaskStatus.WaitingForActivation))
             {
-                Thread.Sleep(100);
+                Console.WriteLine("Task is already running");
+                return false;
             }
+            else
+            {
+
+                //task = Task.Factory.StartNew(() =>
+                //{
+                //    Logger.Log("Task has been started");
+                //    // Do other things here               
+                //});
+            }
+
+            return true;
         }
     }
 }
