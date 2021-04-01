@@ -74,6 +74,16 @@ namespace SampleApp
             }
         }
 
+        public void PrintList(List<ulong> solution)
+        {
+            String str = "Solution=";
+            foreach (ulong index in solution)
+            {
+                str += " " + index + ",";
+            }
+            Console.WriteLine(str);
+        }
+
         public NavMesh()
         {
             Console.WriteLine(this.GetType().FullName);

@@ -90,7 +90,7 @@ namespace fmp
         /// <param name="goalIndex">Index of the goal(aka target) Node.</param>
 		public Ticket(ulong startIndex, ulong goalIndex)
         {
-			Console.WriteLine(this.GetType().FullName);
+			//Console.WriteLine(this.GetType().FullName);
 
 			StartIndex = startIndex;
 			GoalIndex = goalIndex;

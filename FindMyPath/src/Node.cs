@@ -44,7 +44,7 @@ namespace fmp
 
         internal Node(ulong index)
         {
-            Console.WriteLine(this.GetType().FullName);
+            //Console.WriteLine(this.GetType().FullName);
 
             Index = index;
         }

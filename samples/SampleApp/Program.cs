@@ -21,31 +21,34 @@ namespace SampleApp
 
 
             CancellationTokenSource cancelToken = new CancellationTokenSource();
-            Task<Ticket> task = pathEngine.FindPath(ticket, cancelToken);
+            Task<Ticket> task = pathEngine.FindPathAsync(ticket, cancelToken);
             task.ContinueWith(previousTask =>
             {
                 Console.WriteLine("Result Steps=" + previousTask.Result.Steps);
                 Console.WriteLine("Result State=" + previousTask.Result.State);
+                navMesh.PrintList(previousTask.Result.Path);
                 navMesh.PrintMap(previousTask.Result.Path);
             });
 
             Ticket ticket2 = new Ticket(navMesh.GetIndex(1, 1), navMesh.GetIndex(6, 6));
             CancellationTokenSource cancelToken2 = new CancellationTokenSource();
-            Task<Ticket> task2 = pathEngine.FindPath(ticket2, cancelToken2);
+            Task<Ticket> task2 = pathEngine.FindPathAsync(ticket2, cancelToken2);
             task2.ContinueWith(previousTask =>
             {
                 Console.WriteLine("Result2 Steps=" + previousTask.Result.Steps);
                 Console.WriteLine("Result2 State=" + previousTask.Result.State);
+                navMesh.PrintList(previousTask.Result.Path);
                 navMesh.PrintMap(previousTask.Result.Path);
             });
 
             Ticket ticket3 = new Ticket(navMesh.GetIndex(1, 1), navMesh.GetIndex(6, 6));
             CancellationTokenSource cancelToken3 = new CancellationTokenSource();
-            Task<Ticket> task3 = pathEngine.FindPath(ticket3, cancelToken3);
+            Task<Ticket> task3 = pathEngine.FindPathAsync(ticket3, cancelToken3);
             task3.ContinueWith(previousTask =>
             {
                 Console.WriteLine("Result3 Steps=" + previousTask.Result.Steps);
                 Console.WriteLine("Result3 State=" + previousTask.Result.State);
+                navMesh.PrintList(previousTask.Result.Path);
                 navMesh.PrintMap(previousTask.Result.Path);
             });
 

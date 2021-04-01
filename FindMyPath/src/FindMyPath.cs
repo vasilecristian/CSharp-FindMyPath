@@ -11,6 +11,8 @@ namespace fmp
     /// </summary>
     public class FindMyPath: IDisposable
     {
+		bool m_cancelAll = false;
+
         /// <summary>
         /// The constructor.
         /// </summary>
@@ -26,18 +28,21 @@ namespace fmp
         /// <param name="ticket">is the ticket request.</param>
         /// <param name="cancelTokenSrc">is the cancelation token</param>
         /// <returns>a Task that will be competed when the path will be detected.</returns>
-		public async Task<Ticket> FindPath(Ticket ticket, CancellationTokenSource cancelTokenSrc)
+		public async Task<Ticket> FindPathAsync(Ticket ticket, CancellationTokenSource cancelTokenSrc)
         {
 			await Task.Run(() =>
             {
-                Console.WriteLine("Task.Run");
+                //Console.WriteLine("Task.Run");
 
 				while (!ProcessTicket(ticket, cancelTokenSrc.Token))
 				{
-					
+					if(m_cancelAll)
+                    {
+						cancelTokenSrc.Cancel();
+					}
 				}
 
-				Console.WriteLine("Task.Run 2");
+				//Console.WriteLine("Task.Run 2");
 
             }, cancelTokenSrc.Token);
 
@@ -50,7 +55,9 @@ namespace fmp
         /// </summary>
         public void Dispose()
         {
-            Console.WriteLine(this.GetType().FullName + ".Dispose");
+			m_cancelAll = true;
+
+			Console.WriteLine(this.GetType().FullName + ".Dispose");
         }
 
 		
