@@ -38,6 +38,11 @@ namespace fmp
 			/// The ticket was in processing state but the was cancelled from external...
 			/// </summary>
 			CANCELLED,
+
+			/// <summary>
+			/// The destionation is invalid (aka outside of the map, or is a collision tile, etc...).
+			/// </summary>
+			INVALID_GOAL,
 		};
 
 		/// <summary>

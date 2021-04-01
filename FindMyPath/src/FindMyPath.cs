@@ -87,6 +87,11 @@ namespace fmp
 
 			ticket.Steps++;
 
+			if(NavMesh.GetNodeType(ticket.GoalIndex) == NodeType.INVALID)
+            { 
+				ticket.State = Ticket.STATE.INVALID_GOAL;
+				return true;
+			}
 
 			/// Chekc if the StartIndex is the same with GoalIndex
 			if (ticket.StartIndex == ticket.GoalIndex)

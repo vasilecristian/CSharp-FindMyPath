@@ -13,7 +13,7 @@ namespace UnitTest
     {
         // A class that contains MSTest unit tests. (Required)
         [TestClass]
-        public class YourUnitTests
+        public class UnitTests
         {
             static NavMesh navMesh = null;
             static FindMyPath pathEngine = null;
@@ -70,8 +70,8 @@ namespace UnitTest
                 
 
                 Assert.AreEqual(ticketInitial, ticketFinal);
-                Assert.AreEqual(steps, ticketFinal.Steps);
                 Assert.AreEqual(state, ticketFinal.State);
+                Assert.AreEqual(steps, ticketFinal.Steps);
                 Assert.AreEqual(path.Count, ticketFinal.Path.Count);
                 CollectionAssert.AreEqual(path, ticketFinal.Path);
             }
@@ -85,17 +85,49 @@ namespace UnitTest
                     /*Expected Path*/ new List<ulong>(){54, 45, 38, 29, 22, 13, 12, 19, 27, 35, 43, 50, 41, 33, 25, 17, 9 }
                 };
                 yield return new object[] {
-                    /*Input Start X*/(ulong)1, /*Start Y*/(ulong)1, /*End X*/(ulong)6, /*End Y*/(ulong)6,
-                    /*Expected Steps*/ (uint)20,
+                    /*Input Start X*/(ulong)0, /*Start Y*/(ulong)0, /*End X*/(ulong)7, /*End Y*/(ulong)7,
+                    /*Expected Steps*/ (uint)24,
                     /*Expected State*/ Ticket.STATE.COMPLETED,
-                    /*Expected Path*/ new List<ulong>(){54, 45, 38, 29, 22, 13, 12, 19, 27, 35, 43, 50, 41, 33, 25, 17, 9 }
+                    /*Expected Path*/ new List<ulong>(){63, 55, 47, 39, 31, 22, 13, 12, 19, 27, 35, 43, 50, 41, 33, 25, 17, 9, 0 }
                 };
                 yield return new object[] {
-                    /*Input Start X*/(ulong)1, /*Start Y*/(ulong)1, /*End X*/(ulong)6, /*End Y*/(ulong)6,
-                    /*Expected Steps*/ (uint)20,
+                    /*Input Start X*/(ulong)0, /*Start Y*/(ulong)0, /*End X*/(ulong)7, /*End Y*/(ulong)0,
+                    /*Expected Steps*/ (uint)8,
                     /*Expected State*/ Ticket.STATE.COMPLETED,
-                    /*Expected Path*/ new List<ulong>(){54, 45, 38, 29, 22, 13, 12, 19, 27, 35, 43, 50, 41, 33, 25, 17, 9 }
+                    /*Expected Path*/ new List<ulong>(){ 7, 6, 5, 4, 3, 2, 1, 0 }
                 };
+                yield return new object[] {
+                    /*Input Start X*/(ulong)0, /*Start Y*/(ulong)0, /*End X*/(ulong)0, /*End Y*/(ulong)7,
+                    /*Expected Steps*/ (uint)8,
+                    /*Expected State*/ Ticket.STATE.COMPLETED,
+                    /*Expected Path*/ new List<ulong>(){ 56, 48, 41, 33, 25, 17, 9, 0 }
+                };
+                yield return new object[] {
+                    /*Input Start X*/(ulong)0, /*Start Y*/(ulong)0, /*End X*/(ulong)5, /*End Y*/(ulong)3,
+                    /*Expected Steps*/ (uint)12,
+                    /*Expected State*/ Ticket.STATE.COMPLETED,
+                    /*Expected Path*/ new List<ulong>(){ 29, 22, 13, 12, 11, 2, 9, 0 }
+                };
+                yield return new object[] {
+                    /*Input Start X*/(ulong)0, /*Start Y*/(ulong)0, /*End X*/(ulong)1, /*End Y*/(ulong)1,
+                    /*Expected Steps*/ (uint)1,
+                    /*Expected State*/ Ticket.STATE.COMPLETED,
+                    /*Expected Path*/ new List<ulong>(){ 9, 0 }
+                };
+                yield return new object[] {
+                    /*Input Start X*/(ulong)0, /*Start Y*/(ulong)0, /*End X*/(ulong)0, /*End Y*/(ulong)0,
+                    /*Expected Steps*/ (uint)1,
+                    /*Expected State*/ Ticket.STATE.COMPLETED,
+                    /*Expected Path*/ new List<ulong>(){ 0 }
+                };
+
+                yield return new object[] {
+                    /*Input Start X*/(ulong)0, /*Start Y*/(ulong)0, /*End X*/(ulong)0, /*End Y*/(ulong)1,
+                    /*Expected Steps*/ (uint)1,
+                    /*Expected State*/ Ticket.STATE.INVALID_GOAL,
+                    /*Expected Path*/ new List<ulong>(){ }
+                };
+
             }
         }
     }
@@ -109,7 +141,7 @@ namespace UnitTest
 
         const ulong k_w = 8;
         const ulong k_h = 8;
-        ulong[] map = new ulong[8 * 8]
+        ulong[] m_map = new ulong[8 * 8]
         {
             /*     0  1  2  3  4  5  6  7  */
             /*0*/  0, 0, 0, 0, 0, 0, 0, 0, 
@@ -185,6 +217,7 @@ namespace UnitTest
             {
                 for (long x = (long)nodeX - 1; x <= (long)nodeX + 1; x++)
                 {
+                    
                     /// if is outside the mesh do not add it
                     if ((y < 0) || (y >= (long)k_h))
                         continue;
@@ -196,11 +229,11 @@ namespace UnitTest
                     /// if is the current node do not add it
                     if ((x == (long)nodeX) && (y == (long)nodeY))
                         continue;
-
+                    
                     ulong neighborIndex = GetIndex((ulong)x, (ulong)y);//y * (long)k_w + x;
 
                     /// If the tile have collision on it, do not add it
-                    if (map[neighborIndex] == 1)
+                    if (GetNodeType(neighborIndex) != NodeType.AVAILABLE)
                         continue;
 
 
@@ -209,6 +242,20 @@ namespace UnitTest
             }
 
             return neighbors;
+        }
+
+        public NodeType GetNodeType(ulong nodeIndex)
+        {
+            if (nodeIndex >= (k_w * k_h))
+            {
+                return NodeType.INVALID;
+            }
+            else if (m_map[nodeIndex] == 1)
+            {
+                return NodeType.INVALID;
+            }
+
+            return NodeType.AVAILABLE;
         }
     }
 }

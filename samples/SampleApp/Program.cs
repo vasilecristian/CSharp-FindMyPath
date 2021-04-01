@@ -15,10 +15,7 @@ namespace SampleApp
 
             FindMyPath pathEngine = new FindMyPath(navMesh);
 
-            Ticket ticket = new Ticket(navMesh.GetIndex(1, 1), navMesh.GetIndex(6, 6));
-
-            //Ticket ticket = new Ticket(navMesh.GetIndex(0, 0), navMesh.GetIndex(7, 3));
-
+            Ticket ticket = new Ticket(navMesh.GetIndex(0, 0), navMesh.GetIndex(7, 7));
 
             CancellationTokenSource cancelToken = new CancellationTokenSource();
             Task<Ticket> task = pathEngine.FindPathAsync(ticket, cancelToken);
@@ -30,6 +27,7 @@ namespace SampleApp
                 navMesh.PrintMap(previousTask.Result.Path);
             });
 
+            
             Ticket ticket2 = new Ticket(navMesh.GetIndex(1, 1), navMesh.GetIndex(6, 6));
             CancellationTokenSource cancelToken2 = new CancellationTokenSource();
             Task<Ticket> task2 = pathEngine.FindPathAsync(ticket2, cancelToken2);
@@ -51,7 +49,7 @@ namespace SampleApp
                 navMesh.PrintList(previousTask.Result.Path);
                 navMesh.PrintMap(previousTask.Result.Path);
             });
-
+            
 
             int i = 0;
             while (!TaskIsCompleted(task))
@@ -78,7 +76,7 @@ namespace SampleApp
                                    task.Status == TaskStatus.WaitingToRun ||
                                    task.Status == TaskStatus.WaitingForActivation))
             {
-                Console.WriteLine("Task is already running");
+                //Console.WriteLine("Task is already running");
                 return false;
             }
             else

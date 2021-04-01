@@ -4,11 +4,11 @@ using fmp;
 
 namespace SampleApp
 {
+   
     public class NavMesh : INavMesh
     {
         const uint ROW = 0;
         const uint COL = 1;
-
 
         //const ulong k_w = 8;
         //const ulong k_h = 8;
@@ -27,7 +27,7 @@ namespace SampleApp
 
         const ulong k_w = 8;
         const ulong k_h = 8;
-        ulong[] map = new ulong[8 * 8]
+        long[] m_map = new long[8 * 8]
         {
             /*     0  1  2  3  4  5  6  7  */
             /*0*/  0, 0, 0, 0, 0, 0, 0, 0, 
@@ -67,7 +67,7 @@ namespace SampleApp
                     }
                     else
                     {
-                        line += map[index] + ", ";
+                        line += m_map[index] + ", ";
                     }
                 }
                 Console.WriteLine(line);
@@ -161,6 +161,7 @@ namespace SampleApp
             {
                 for (long x = (long)nodeX - 1; x <= (long)nodeX + 1; x++)
                 {
+                    
                     /// if is outside the mesh do not add it
                     if ((y < 0) || (y >= (long)k_h))
                         continue;
@@ -172,11 +173,11 @@ namespace SampleApp
                     /// if is the current node do not add it
                     if ((x == (long)nodeX) && (y == (long)nodeY))
                         continue;
-
+                    
                     ulong neighborIndex = GetIndex((ulong)x, (ulong)y);//y * (long)k_w + x;
 
                     /// If the tile have collision on it, do not add it
-                    if (map[neighborIndex] == 1)
+                    if (GetNodeType(neighborIndex) != NodeType.AVAILABLE)
                         continue;
 
 
@@ -185,6 +186,21 @@ namespace SampleApp
             }
 
             return neighbors;
+        }
+
+
+        public NodeType GetNodeType(ulong nodeIndex)
+        {
+            if(nodeIndex >= (k_w*k_h))
+            {
+                return NodeType.INVALID;
+            }
+            else if(m_map[nodeIndex] == 1)
+            {
+                return NodeType.INVALID;
+            }
+
+            return NodeType.AVAILABLE;
         }
     }
 }
