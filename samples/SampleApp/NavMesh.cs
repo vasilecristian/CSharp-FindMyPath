@@ -53,7 +53,8 @@ namespace SampleApp
 
         public void PrintMap(List<ulong> solution)
         {
-            Console.WriteLine("    |   0  1  2  3  4  5  6  7   ");
+            Console.WriteLine("---------------------------------");
+            Console.WriteLine("    |  0  1  2  3  4  5  6  7    ");
             Console.WriteLine("---------------------------------");
             for (ulong y = 0; y < k_h; y++)
             {
@@ -72,9 +73,10 @@ namespace SampleApp
                 }
                 Console.WriteLine(line);
             }
+            Console.WriteLine("---------------------------------");
         }
 
-        public void PrintList(List<ulong> solution)
+        public void PrintSolution(List<ulong> solution)
         {
             String str = "Solution=";
             foreach (ulong index in solution)

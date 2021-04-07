@@ -11,7 +11,7 @@ namespace fmp
     /// </summary>
     public class FindMyPath: IDisposable
     {
-		bool m_cancelAll = false;
+		List<CancellationTokenSource> m_cancelTokensSrc = new List<CancellationTokenSource>();
 
         /// <summary>
         /// The constructor.
@@ -30,18 +30,20 @@ namespace fmp
         /// <returns>a Task that will be competed when the path will be detected.</returns>
 		public async Task<Ticket> FindPathAsync(Ticket ticket, CancellationTokenSource cancelTokenSrc)
         {
+			m_cancelTokensSrc.Add(cancelTokenSrc);
+
 			await Task.Run(() =>
-            {
-                //Console.WriteLine("Task.Run");
+            { 
+				//Console.WriteLine("Task.Run");
 
-				while (!ProcessTicket(ticket, cancelTokenSrc.Token))
+				try
 				{
-					if(m_cancelAll)
-                    {
-						cancelTokenSrc.Cancel();
-					}
+					while (!ProcessTicket(ticket, cancelTokenSrc.Token));					
 				}
+				catch(OperationCanceledException)
+                {
 
+                }
 				//Console.WriteLine("Task.Run 2");
 
             }, cancelTokenSrc.Token);
@@ -49,18 +51,33 @@ namespace fmp
 			return ticket;
         }
 
-        /// <summary>
-        /// This will release all internal allocated resources when this object will
-        /// not be used anymore. Resources = ongoing process, memory, etc...
-        /// </summary>
-        public void Dispose()
+		/// <summary>
+		/// Cancel all in progress jobs.
+		/// </summary>
+		public void CalcelAll()
+		{
+			foreach(CancellationTokenSource cts in m_cancelTokensSrc)
+            {
+				if(!cts.IsCancellationRequested)
+                {
+					cts.Cancel();
+                }
+            }
+
+			Console.WriteLine(this.GetType().FullName + ".CalcelAll");
+		}
+
+		/// <summary>
+		/// This will release all internal allocated resources when this object will
+		/// not be used anymore. Resources = ongoing process, memory, etc...
+		/// </summary>
+		public void Dispose()
         {
-			m_cancelAll = true;
+			CalcelAll();
 
 			Console.WriteLine(this.GetType().FullName + ".Dispose");
         }
 
-		
 
 		/// <summary>
         /// This is the A* function. This will be called multiple times until
@@ -79,7 +96,7 @@ namespace fmp
 				/// In case the Cancel was requested from external,
 				/// the function will return.
 				ticket.State = Ticket.STATE.CANCELLED;
-				return true;
+				token.ThrowIfCancellationRequested();
 			}
 
 			/// Switch the state to Processing.
